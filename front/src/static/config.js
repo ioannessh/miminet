@@ -657,7 +657,10 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
 
         let job_elem = jQuery.extend({}, elem);
         job_elem.innerHTML = job_elem.innerHTML.replace(/config_host_job_delete/g, 'config_host_job_delete_' + jid);
-        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + host_jobs[i].print_cmd + '</small>');
+        job_elem.innerHTML = job_elem.innerHTML.replace(
+            /justify-content-between align-items-center draggable-item\">/, 
+            'justify-content-between align-items-center draggable-item\" id="'+jid+'"><span class="drag-handle">⋮</span><small>' + host_jobs[i].print_cmd + '</small>'
+        );
 
         let text = job_elem.innerHTML;
         //$(text).insertBefore(host_id);
@@ -671,7 +674,10 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
         });
 
     });
+
+    AddEventListenersDrangAndDrop(host_id.value, network_guid, 'config_host_job_list', UpdateOrderJobs);
 }
+
 
 const ConfigHostGateway = function (gw) {
 
@@ -788,7 +794,10 @@ const ConfigRouterJob = function (router_jobs, shared = 0) {
 
         let job_elem = jQuery.extend({}, elem);
         job_elem.innerHTML = job_elem.innerHTML.replace(/config_router_job_delete/g, 'config_router_job_delete_' + jid);
-        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + router_jobs[i].print_cmd + '</small>');
+        job_elem.innerHTML = job_elem.innerHTML.replace(
+            /justify-content-between align-items-center draggable-item\">/, 
+            'justify-content-between align-items-center draggable-item\" id="'+jid+'"><span class="drag-handle">⋮</span><small>' + router_jobs[i].print_cmd + '</small>'
+        );
 
         let text = job_elem.innerHTML;
         //$(text).insertBefore(host_id);
@@ -801,6 +810,8 @@ const ConfigRouterJob = function (router_jobs, shared = 0) {
             }
         });
     });
+
+    AddEventListenersDrangAndDrop(router_id.value, network_guid, 'config_router_job_list', UpdateOrderJobs);
 }
 
 const ConfigServerJob = function (server_jobs, shared = 0) {
@@ -844,7 +855,10 @@ const ConfigServerJob = function (server_jobs, shared = 0) {
 
         let job_elem = jQuery.extend({}, elem);
         job_elem.innerHTML = job_elem.innerHTML.replace(/config_server_job_delete/g, 'config_server_job_delete_' + jid);
-        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + server_jobs[i].print_cmd + '</small>');
+        job_elem.innerHTML = job_elem.innerHTML.replace(
+            /justify-content-between align-items-center draggable-item\">/, 
+            'justify-content-between align-items-center draggable-item\" id="'+jid+'"><span class="drag-handle">⋮</span><small>' + server_jobs[i].print_cmd + '</small>'
+        );
 
         let text = job_elem.innerHTML;
         //$(text).insertBefore(host_id);
@@ -859,6 +873,8 @@ const ConfigServerJob = function (server_jobs, shared = 0) {
 
         });
     });
+
+    AddEventListenersDrangAndDrop(server_id.value, network_guid, 'config_server_job_list');
 }
 
 const ConfigServerJobOnChange = function (evnt) {

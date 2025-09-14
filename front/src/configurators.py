@@ -13,6 +13,10 @@ def get_data(arg: str):
     """Get data from user's request"""
     return request.form.get(arg, type=str)
 
+def get_list(arg: str):
+    """Get list from user's request"""
+    return request.form.getlist(f"{arg}[]")
+
 
 class JobArgConfigurator:
     """Class with job argument data"""

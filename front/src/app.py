@@ -56,6 +56,7 @@ from miminet_network import (
     web_network,
     web_network_shared,
     get_emulation_queue_size,
+    update_order_jobs,
     get_last_emulation_time,
 )
 from miminet_shark import mimishark_page
@@ -158,6 +159,7 @@ app.add_url_rule(
     view_func=upload_network_picture,
 )
 app.add_url_rule("/network/copy_network", methods=["POST"], view_func=copy_network)
+app.add_url_rule("/network/update_order_jobs", methods=["POST"], view_func=update_order_jobs)
 
 # Simulation
 app.add_url_rule("/run_simulation", methods=["POST"], view_func=run_simulation)
@@ -360,6 +362,7 @@ def sitemap():
         "/network/update_network_config",
         "/host/save_config",
         "/host/delete_job",
+        "host/update_order_jobs"
         "/host/hub_save_config",
         "/host/switch_save_config",
         "/user/profile.html",

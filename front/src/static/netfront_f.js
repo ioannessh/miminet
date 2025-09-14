@@ -1412,6 +1412,59 @@ const UpdateHostConfiguration = function (data, host_id)
     });
 }
 
+const UpdateOrderJobs = function (host_id, jobs_order, network_guid)
+{
+    SetNetworkPlayerState(-1);
+
+    let data = {
+      host_id: host_id,
+      guid: network_guid,
+      order: jobs_order,
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: '/network/update_order_jobs',
+        data: data,
+        encode: true,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update jobs
+                jobs = data.jobs;
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === host_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого хоста');
+                    return;
+                }
+
+                if (n.config.type === 'host'){
+                    ShowHostConfig(n);
+                } else  if (n.config.type === 'router'){
+                    ShowRouterConfig(n);
+                } else if (n.config.type === 'server'){
+                    ShowServerConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не хост');
+                }
+
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось обновить порядок команд');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
 // Delete job from host
 const DeleteJobFromHost = function (host_id, job_id, network_guid)
 {
@@ -2218,4 +2271,143 @@ const RestoreNetworkObject = function (){
     edges=x.edges;
 
     return 0;
+}
+
+function AddEventListenersDrangAndDrop (host_id, network_guid, list_id) 
+{
+    const list = document.getElementById(list_id);
+    let draggedItem = null;
+
+    list.addEventListener('dragstart', handleDragStart);
+    list.addEventListener('dragover', handleDragOver);
+    list.addEventListener('dragenter', handleDragEnter);
+    list.addEventListener('dragleave', handleDragLeave);
+    list.addEventListener('drop', handleDrop);
+    list.addEventListener('dragend', handleDragEnd);
+
+    list.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.drag-handle')) {
+            const item = e.target.closest('.draggable-item');
+            if (item) {
+                document.querySelectorAll('.draggable-item').forEach(i => i.setAttribute('draggable', 'false'));
+                item.setAttribute('draggable', 'true');
+                item.classList.add('ready-to-drag');
+            }
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        document.querySelectorAll('.draggable-item').forEach(i => {
+            i.setAttribute('draggable', 'false');
+            i.classList.remove('ready-to-drag');
+        });
+    });
+
+
+    function handleDragStart(e) {
+        if (e.target.classList.contains('draggable-item') && e.target.classList.contains('ready-to-drag')) {
+            draggedItem = e.target;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.outerHTML);
+
+            setTimeout(() => {
+                e.target.classList.add('dragging');
+            }, 0);
+
+            document.body.style.userSelect = 'none';
+            document.body.style.webkitUserSelect = 'none';
+            document.body.style.mozUserSelect = 'none';
+            document.body.style.msUserSelect = 'none';
+        } else {
+            e.preventDefault();
+        }
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function handleDragEnter(e) {
+        e.preventDefault();
+        const targetItem = e.target.closest('.draggable-item');
+
+        if (targetItem && targetItem !== draggedItem) {
+            const rect = targetItem.getBoundingClientRect();
+            const offset = e.clientY - rect.top;
+            const height = rect.height;
+
+            targetItem.classList.remove('drag-over-top', 'drag-over-bottom');
+
+            if (offset < height / 2) {
+                targetItem.classList.add('drag-over-top');
+            } else {
+                targetItem.classList.add('drag-over-bottom');
+            }
+        }
+    }
+
+    function handleDragLeave(e) {
+        const targetItem = e.target.closest('.draggable-item');
+        if (targetItem) {
+            if (!e.relatedTarget || !targetItem.contains(e.relatedTarget)) {
+                targetItem.classList.remove('drag-over-top', 'drag-over-bottom');
+            }
+        }
+    }
+
+    function handleDrop(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const targetItem = e.target.closest('.draggable-item');
+
+        if (targetItem && draggedItem && targetItem !== draggedItem) {
+            document.querySelectorAll('.draggable-item').forEach(item => {
+                item.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+
+            const rect = targetItem.getBoundingClientRect();
+            const offset = e.clientY - rect.top;
+            const height = rect.height;
+
+            if (offset < height / 2) {
+                list.insertBefore(draggedItem, targetItem);
+            } else {
+                list.insertBefore(draggedItem, targetItem.nextSibling);
+            }
+        }
+        return false;
+    }
+
+    function handleDragEnd(e) {
+        document.querySelectorAll('.draggable-item').forEach(item => {
+            item.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom', 'ready-to-drag');
+            item.setAttribute('draggable', 'false');
+        });
+
+        
+        let list = document.getElementById(list_id);
+        const order = [];
+
+        list.querySelectorAll('.draggable-item').forEach (item => {
+            order.push(item.id);
+        });
+
+        UpdateOrderJobs(host_id, order, network_guid)
+
+        document.body.style.userSelect = '';
+        document.body.style.webkitUserSelect = '';
+        document.body.style.mozUserSelect = '';
+        document.body.style.msUserSelect = '';
+
+        draggedItem = null;
+    }
+
+    document.addEventListener('dragover', (e) => {
+        if (draggedItem) {
+            e.preventDefault();
+        }
+    });
 }

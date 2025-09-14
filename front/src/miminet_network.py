@@ -11,12 +11,17 @@ from flask import (
     render_template,
     request,
     url_for,
+    Response,
 )
 from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
 from miminet_model import Network, Simulate, db, SimulateLog
 import datetime
 from sqlalchemy import not_
+from configurators import (
+    get_data,
+    get_list,
+)
 
 
 @login_required
@@ -560,3 +565,61 @@ def get_emulation_queue_size():
         jsonify({"size": emulated_networks_count}),
         200,
     )
+
+
+@login_required
+def update_order_jobs():
+    """
+    Called when job ordering is updated for an network device
+    """
+    user = current_user
+    network_guid = get_data("guid")
+    new_order = get_list("order")
+    host_id = get_data("host_id")
+
+    def build_response(msg: str) -> Response:
+        return make_response(jsonify({"message": msg}), 400)
+    
+    if request.method != "POST":
+        return build_response("Неверный запрос")
+
+    if not network_guid:
+        return build_response("Не указан параметр net_guid")
+
+    if not new_order:
+        return build_response("Не указан порядок команд")
+    
+    cur_network: Network = (
+        Network.query.filter(Network.guid == network_guid)
+        .filter(Network.author_id == user.id)
+        .first()
+    )
+
+    if not cur_network:
+        return build_response("Такая сеть не найдена")
+    
+    json_network: dict = json.loads(cur_network.network)
+
+    # get jobs & reorder jobs
+    jobs: list = json_network["jobs"]
+
+    order_map = {new_order[i]: i for i in range(0, len(new_order))}
+
+    other_jobs = list(filter(lambda x: x["host_id"] != host_id, jobs))
+    jobs = list(filter(lambda x: x["host_id"] == host_id, jobs))
+    
+    new_jobs: list = list(sorted(jobs, key=lambda x: order_map.get(x["id"])))
+
+    json_network["jobs"] = other_jobs + new_jobs
+
+    cur_network.network = json.dumps(json_network)
+
+    # Remove all previous simulations
+    sims = Simulate.query.filter(Simulate.network_id == cur_network.id).all()
+    for s in sims:
+        db.session.delete(s)
+
+    db.session.commit()
+
+    return {"message": "Команды обновлены", "jobs": json_network["jobs"]}
+
