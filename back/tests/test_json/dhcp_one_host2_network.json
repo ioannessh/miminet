@@ -1,0 +1,103 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "id": "server_1",
+        "label": "server_1"
+      },
+      "position": {
+        "x": 471.75,
+        "y": 132
+      },
+      "classes": [
+        "server"
+      ],
+      "config": {
+        "type": "server",
+        "label": "server_1",
+        "default_gw": ""
+      },
+      "interface": [
+        {
+          "id": "iface_28502440",
+          "name": "iface_28502440",
+          "connect": "edge_mh4yr00qjsc3tatvu3",
+          "ip": "192.168.0.2",
+          "netmask": 24
+        }
+      ]
+    },
+    {
+      "data": {
+        "id": "host_1",
+        "label": "host_1"
+      },
+      "position": {
+        "x": 471.75,
+        "y": 227.0999984741211
+      },
+      "classes": [
+        "host"
+      ],
+      "config": {
+        "type": "host",
+        "label": "host_1",
+        "default_gw": ""
+      },
+      "interface": [
+        {
+          "id": "iface_45512224",
+          "name": "iface_45512224",
+          "connect": "edge_mh4yr00qjsc3tatvu3",
+          "ip": "192.168.0.1",
+          "netmask": 24
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "id": "edge_mh4yr00qjsc3tatvu3",
+        "source": "host_1",
+        "target": "server_1",
+        "loss_percentage": 0
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "id": "a2e95990630f44f594eea34df5b74ed4",
+      "job_id": 203,
+      "print_cmd": "dhcp ip range: 192.168.0.100,192.168.0.100/24 gw: 192.168.0.2",
+      "arg_1": "192.168.0.100",
+      "arg_2": "192.168.0.100",
+      "arg_3": "24",
+      "arg_4": "192.168.0.2",
+      "level": 0,
+      "host_id": "server_1"
+    },
+    {
+      "id": "c0776a91fab64f8ba25d35a7ced1532f",
+      "job_id": 108,
+      "print_cmd": "dhcp client",
+      "arg_1": "1",
+      "level": 1,
+      "host_id": "host_1"
+    },
+    {
+      "id": "75fd43f71b5342c6bd3cfcdc4b9beb59",
+      "job_id": 1,
+      "print_cmd": "ping -c 1 192.168.0.100",
+      "arg_1": "192.168.0.100",
+      "level": 2,
+      "host_id": "server_1"
+    }
+  ],
+  "config": {
+    "zoom": 2,
+    "pan_x": -18,
+    "pan_y": -10
+  },
+  "pcap": []
+}
