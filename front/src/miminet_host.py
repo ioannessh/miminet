@@ -248,7 +248,6 @@ arp_job.add_param("config_host_add_arp_cache_mac_input_field").add_check(
 ).set_error_msg('MAC-адрес для команды "Добавить запись в ARP-cache" указан неверно')
 
 host_dhclient_job = host.create_job(108, "dhcp client")
-host_dhclient_job.add_param("config_host_add_dhclient_field")
 host_dhclient_job.add_param("config_host_add_dhclient_interface_select_iface_field").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Запросить IP адрес автоматически"')
