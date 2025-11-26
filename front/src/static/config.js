@@ -48,6 +48,33 @@ const ServerWarningMsg = function (msg) {
     $(config_content_id).prepend(warning_msg);
 }
 
+const HostErrorMsg = function (msg) {
+
+    $(config_content_id).find('.alert-info, .alert-danger').remove();
+
+    let error_msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+        msg + '<button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+
+    $(config_content_id).prepend(error_msg);
+
+    $("#config_main_form :input").prop("disabled", false);
+    $("#config_router_main_form :input").prop("disabled", false);
+    $("#config_server_main_form :input").prop("disabled", false);
+
+    $('#config_host_main_form_submit_button').text('Сохранить').removeClass('disabled');
+    $('#config_router_main_form_submit_button').text('Сохранить').removeClass('disabled');
+    $('#config_server_main_form_submit_button').text('Сохранить').removeClass('disabled');
+}
+
+const UpdateJobCounter = function (counterId, deviceId = null) {
+    const counter = document.getElementById(counterId);
+    if (!counter) {
+        return;
+    }
+
+    counter.style.display = 'none';
+}
+
 const UpdateHostConfigurationForm = function(host_id) {
     let data = $('#config_main_form').serialize();
 
@@ -606,12 +633,7 @@ const ConfigHostJobOnChange = function (evnt) {
         
         case '108':
             UpdateHostForm('config_host_add_dhclient');
-
-            let host_id = $('#host_id')[0].value;
-            // let network_guid = $('#net_guid')[0].value;
-            UpdateHostConfigurationForm(host_id);
-
-            $('div[name="config_host_select_input"]').remove();
+            FillDeviceSelectIntf('#config_host_add_dhclient_interface_select_iface_field', '#host_id', "Выберите линк", false)
             break;
 
         case '0':
@@ -637,6 +659,9 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
 
     // Set onchange
     document.getElementById('config_host_job_select_field').addEventListener('change', ConfigHostJobOnChange);
+
+    // Update job counter with device ID
+    UpdateJobCounter('config_host_job_counter', host_id.value);
 
     elem = document.getElementById('config_host_job_list_script').innerHTML;
     if (!elem) {
@@ -718,36 +743,36 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
         case '100':
             UpdateRouterForm('config_router_add_ip_mask_script');
-            FillRouterSelect("#config_router_add_ip_mask_iface_select_field", "Выберите линк", false);
+            FillDeviceSelectIntf("#config_router_add_ip_mask_iface_select_field", '#router_id', "Выберите линк", false);
         
             break;
         case '101':
             UpdateRouterForm('config_router_add_nat_masquerade_script');
-            FillRouterSelect("#config_router_add_nat_masquerade_iface_select_field", "Выберите линк", false);
+            FillDeviceSelectIntf("#config_router_add_nat_masquerade_iface_select_field", '#router_id', "Выберите линк", false);
 
             break;
         case '102':
             UpdateRouterForm('config_router_add_route_script');
 
-            break;  
+            break;
         case '104':
             UpdateRouterForm('config_router_add_subinterface_script');
-            FillRouterSelect("#config_router_add_subinterface_iface_select_field", "Выберите линк" ,false);
+            FillDeviceSelectIntf("#config_router_add_subinterface_iface_select_field", '#router_id', "Выберите линк" ,false);
 
             break;
         case '105':
             UpdateRouterForm('config_router_add_ipip_tunnel_script');
-            FillRouterSelect("#config_router_add_ipip_tunnel_iface_select_ip_field");
+            FillDeviceSelectIntf("#config_router_add_ipip_tunnel_iface_select_ip_field", '#router_id');
 
             break;
         case '106':
             UpdateRouterForm('config_router_add_gre_interface_script');
-            FillRouterSelect("#config_router_add_gre_interface_select_ip_field");
+            FillDeviceSelectIntf("#config_router_add_gre_interface_select_ip_field", '#router_id');
 
             break;
         case '107':
             UpdateRouterForm('config_router_add_arp_proxy_script');
-            FillRouterSelect("#config_router_add_arp_proxy_iface_select_field", "Выберите линк", false);
+            FillDeviceSelectIntf("#config_router_add_arp_proxy_iface_select_field", '#router_id', "Выберите линк", false);
 
             break;
         default:
@@ -768,6 +793,9 @@ const ConfigRouterJob = function (router_jobs, shared = 0) {
 
     // Set onchange
     document.getElementById('config_router_job_select_field').addEventListener('change', ConfigRouterJobOnChange);
+
+    // Update job counter with device ID
+    UpdateJobCounter('config_router_job_counter', router_id.value);
 
     elem = document.getElementById('config_router_job_list_script').innerHTML;
     if (!elem) {
@@ -824,6 +852,9 @@ const ConfigServerJob = function (server_jobs, shared = 0) {
 
     // Set onchange
     document.getElementById('config_server_job_select_field').addEventListener('change', ConfigServerJobOnChange);
+
+    // Update job counter with device ID
+    UpdateJobCounter('config_server_job_counter', server_id.value);
 
     elem = document.getElementById('config_server_job_list_script').innerHTML;
     if (!elem) {
@@ -911,6 +942,7 @@ const ConfigServerJobOnChange = function (evnt) {
         
         case '203':
             UpdateServerForm('config_server_add_dhcp_server_script');
+            FillDeviceSelectIntf('#config_server_add_dhcp_interface_select_iface_field', '#server_id', "Выберите линк", false)
             break;
 
         default:
@@ -950,7 +982,7 @@ const UpdateRouterForm = function(name) {
     $(elem).insertBefore(router_job_list);
 }
 
-const FillRouterSelect = function(select_id, field_msg = 'Интерфейс начальной точки', return_ip = true) {
+const FillDeviceSelectIntf = function(select_id, device, field_msg = 'Интерфейс начальной точки', return_ip = true) {
     /**
     * Fill select element with network hosts.
     * @param  {String} select_id ID(name) of the element to which you need to add data.
@@ -959,21 +991,21 @@ const FillRouterSelect = function(select_id, field_msg = 'Интерфейс н�
    */
 
     // configured router id
-    router_id = $('#router_id')[0].value;
+    device_id = $(device)[0].value;
 
-    if (!router_id) {
-        console.log("Не нашел router_id");
+    if (!device_id) {
+        console.log("Не нашел device_id");
         return
     }
 
-    router_node = nodes.find(n => n.data.id === router_id);
+    device_node = nodes.find(n => n.data.id === device_id);
     
-    if (!router_node) {
-        console.log("Не нашел router_node");
+    if (!device_node) {
+        console.log("Не нашел device_node");
         return;
     }
 
-    if (!router_node.interface.length) {
+    if (!device_node.interface.length) {
         $(select_id).append('<option selected value="0">Мало интерфейсов</option>');
         return;
     } else {
@@ -986,7 +1018,7 @@ const FillRouterSelect = function(select_id, field_msg = 'Интерфейс н�
         document.getElementById('router_connection_host_label_hidden').value = selectedLabel; // Записываем его в скрытое поле
     });
 
-    router_node.interface.forEach(function(iface) {
+    device_node.interface.forEach(function(iface) {
         // iterating over the router interfaces
 
         let iface_id = iface.id;
@@ -1018,18 +1050,19 @@ const FillRouterSelect = function(select_id, field_msg = 'Интерфейс н�
             return;
         }
 
-        let router_connection = (router_node.data.id === edge_target) ? edge_source : edge_target;
+        let device_connection = (device_node.data.id === edge_target) ? edge_source : edge_target;
 
-        let router_connection_host_node = nodes.find(n => n.data.id === router_connection);
-        let router_connection_host_label = (router_connection_host_node) ? router_connection_host_node.data.label : "Unknown";
+        let device_connection_host_node = nodes.find(n => n.data.id === device_connection);
+        let device_connection_host_label = (device_connection_host_node) ? device_connection_host_node.data.label : "Unknown";
 
-        $(select_id).append('<option value="' + (return_ip ? iface_ip : iface_id) + '">' + router_connection_host_label + '</option>');
+        $(select_id).append('<option value="' + (return_ip ? iface_ip : iface_id) + '">' + device_connection_host_label + '</option>');
 
     });
 }
 
 const DisableVXLANInputs = function (n) {
     var modalId = 'VxlanConfigModal' + n.data.id;
+
 
     $(document).ready(function () {
         $('#config_button_vxlan').prop('disabled', false);
