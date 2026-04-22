@@ -162,8 +162,10 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     flow = mocker.Mock()
     flow.credentials = SimpleNamespace(_id_token="token")
     flow.fetch_token.return_value = None
+    filtered_query = mocker.Mock()
+    filtered_query.first.side_effect = [None, SimpleNamespace(id=10)]
     user_query = mocker.Mock()
-    user_query.filter_by.return_value.first.side_effect = [None, SimpleNamespace(id=10)]
+    user_query.filter_by.return_value = filtered_query
     user_ctor = mocker.patch("miminet_auth.User")
     user_ctor.query = user_query
 
@@ -185,9 +187,8 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     mocker.patch("miminet_auth.requests.get")
     mocker.patch("miminet_auth.login_user")
     mocker.patch("miminet_auth.create_access_token")
-    mocker.patch("miminet_auth.user.id", return_value=10)
-    mocker.patch("miminet_auth.set_access_cookies")
-    mocker.patch("miminet_auth.set_refresh_cookies")
+    mocker.patch("miminet_auth.set_access_cookies", return_value="redirected")
+    mocker.patch("miminet_auth.set_refresh_cookies", return_value="redirected")
     redirect_next_mock = mocker.patch(
         "miminet_auth.redirect_next_url", return_value="redirected"
     )
