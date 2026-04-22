@@ -203,11 +203,13 @@ def test_yandex_callback_handles_user_info_and_creates_user_in_db(app, mocker):
     """
     with app.test_request_context("/yandex_callback?code=test-code", method="GET"):
         session["state"] = "test_state"
-        mock_oauth2session = mocker.patch("miminet_auth.OAuth2Session")
+        filtered_query = mocker.Mock()
+        filtered_query.first.return_value = None
         mock_user = mocker.patch("miminet_auth.User")
+        mock_user.query.filter_by.return_value = filtered_query
+        mock_oauth2session = mocker.patch("miminet_auth.OAuth2Session")
         mock_session = mocker.patch("miminet_auth.db.session")
         mocker.patch("miminet_auth.login_user")
-        mocker.patch("miminet_auth.user.id", return_value=10)
         mock_get = mock_oauth2session.return_value.get
         mock_get.return_value.raise_for_status.return_value = None
         mock_get.return_value.json.return_value = {
@@ -215,7 +217,6 @@ def test_yandex_callback_handles_user_info_and_creates_user_in_db(app, mocker):
             "login": "test_login",
             "default_email": "test_email@example.com",
         }
-        mock_user.query.filter_by().first.return_value = None
         yandex_callback(yandex_json)
         mock_user.assert_called_once_with(
             nick="test_login", yandex_id="test_id", email="test_email@example.com"
