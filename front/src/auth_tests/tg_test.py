@@ -3,9 +3,11 @@ import hmac
 import json
 import os
 import time
+from datetime import timedelta
 
 import pytest
 from flask import Flask, url_for
+from flask_jwt_extended import JWTManager
 from miminet_auth import check_tg_authorization, db, login_index, tg_callback
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -15,6 +17,16 @@ def app():
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["SECRET_KEY"] = os.urandom(16).hex()
+    app.config.update(
+        JWT_SECRET_KEY="test-secret",
+        JWT_TOKEN_LOCATION=["cookies"],
+        JWT_COOKIE_DOMAIN=f".localhost",
+        JWT_COOKIE_SECURE=False,  # True,
+        JWT_COOKIE_CSRF_PROTECT=False,
+        JWT_COOKIE_SAMESITE="Lax",
+        JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=1),
+        JWT_REFRESH_TOKEN_EXPIRES=timedelta(hours=2),
+    )
 
     with app.test_request_context():
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
@@ -27,6 +39,8 @@ def app():
         @app.route("/home")
         def home():
             pass
+
+    JWTManager(app)
 
     return app
 

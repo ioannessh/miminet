@@ -1,4 +1,5 @@
 import io
+from datetime import timedelta
 from types import SimpleNamespace
 
 import miminet_auth
@@ -12,6 +13,16 @@ def _build_test_app():
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["SECRET_KEY"] = "test-secret"
+    app.config.update(
+        JWT_SECRET_KEY="test-secret",
+        JWT_TOKEN_LOCATION=["cookies"],
+        JWT_COOKIE_DOMAIN=f".localhost",
+        JWT_COOKIE_SECURE=False,  # True,
+        JWT_COOKIE_CSRF_PROTECT=False,
+        JWT_COOKIE_SAMESITE="Lax",
+        JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=1),
+        JWT_REFRESH_TOKEN_EXPIRES=timedelta(hours=2),
+    )
     app.add_url_rule("/profile", endpoint="user_profile", view_func=lambda: "ok")
     app.add_url_rule("/login", endpoint="login_index", view_func=lambda: "login")
     app.add_url_rule("/home", endpoint="home", view_func=lambda: "home")
