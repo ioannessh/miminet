@@ -141,6 +141,7 @@ def test_tg_callback_handles_user_info_and_creates_user_in_db(app, mocker):
         mocker.patch("miminet_auth.request.args.get")
         mocker.patch("miminet_auth.login_user")
         mocker.patch("miminet_auth.check_tg_authorization")
+        mocker.patch("miminet_auth.user.id", return_value=10)
         mock_user_data.return_value = user_json
         mock_user.query.filter().first.return_value = None
         tg_callback()

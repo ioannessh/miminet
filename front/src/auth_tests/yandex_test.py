@@ -207,6 +207,7 @@ def test_yandex_callback_handles_user_info_and_creates_user_in_db(app, mocker):
         mock_user = mocker.patch("miminet_auth.User")
         mock_session = mocker.patch("miminet_auth.db.session")
         mocker.patch("miminet_auth.login_user")
+        mocker.patch("miminet_auth.user.id", return_value=10)
         mock_get = mock_oauth2session.return_value.get
         mock_get.return_value.raise_for_status.return_value = None
         mock_get.return_value.json.return_value = {

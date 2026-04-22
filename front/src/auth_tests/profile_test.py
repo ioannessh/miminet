@@ -184,6 +184,10 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     mocker.patch("miminet_auth.db.session.commit")
     mocker.patch("miminet_auth.requests.get")
     mocker.patch("miminet_auth.login_user")
+    mocker.patch("miminet_auth.create_access_token")
+    mocker.patch("miminet_auth.user.id", return_value=10)
+    mocker.patch("miminet_auth.set_access_cookies")
+    mocker.patch("miminet_auth.set_refresh_cookies")
     redirect_next_mock = mocker.patch(
         "miminet_auth.redirect_next_url", return_value="redirected"
     )

@@ -264,7 +264,6 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
         elif cookie.name and cookie.value:
             selenium_cookie = {
                 "domain": testing_setting.nginx_docker_ip,
-                "expiry": None,
                 "httpOnly": False,
                 "name": cookie.name,
                 "path": "/",
