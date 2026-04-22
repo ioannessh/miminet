@@ -244,6 +244,7 @@ def requester():
 def selenium(chrome_driver: MiminetTester, requester: Session):
     chrome_driver.get(MAIN_PAGE)
     cookies = requester.cookies
+    print(cookies)
 
     # gift cookies to selenium
     for cookie in cookies:
@@ -259,6 +260,9 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
                 "value": cookie.value,
             }
             chrome_driver.add_cookie(selenium_cookie)
+            print(f"Add {cookie.name}")
+        else:
+            print(f"Not add {cookie.name}")
 
     # return configured chrome driver
     return chrome_driver

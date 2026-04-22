@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import miminet_auth
 import pytest
 from flask import Flask, session
+from flask_jwt_extended import JWTManager
 from werkzeug.exceptions import Forbidden
 
 
@@ -17,6 +18,7 @@ def _build_test_app():
     app.add_url_rule(
         "/auth/google_callback", endpoint="google_callback", view_func=lambda: "google"
     )
+    JWTManager(app)
     return app
 
 
