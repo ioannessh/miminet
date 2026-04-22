@@ -229,6 +229,7 @@ def login_index():
 
     link_provider = request.args.get("link_provider", type=str)
     telegram_link_mode = current_user.is_authenticated and link_provider == "tg"
+    print(f"telegram_link_mode {telegram_link_mode}")
 
     if current_user.is_authenticated:
         access_token = create_access_token(identity=str(current_user.id))
