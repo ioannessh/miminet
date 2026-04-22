@@ -257,6 +257,9 @@ def login_index():
         password = request.form.get("password")
         user = User.query.filter_by(email=email).first()
         if user:
+            access_token = create_access_token(identity=str(user.id))
+            refresh_token = create_refresh_token(identity=str(user.id))
+
             if check_password_hash(user.password_hash, password):
                 login_user(user, remember=True)
                 access_token = create_access_token(identity=str(user.id))
@@ -267,8 +270,11 @@ def login_index():
                 set_refresh_cookies(response, refresh_token)
                 return response
             else:
+                response = render_template("auth/login.html", user=current_user)
+                set_access_cookies(response, access_token)
+                set_refresh_cookies(response, refresh_token)
                 flash("Пара логин и пароль указаны неверно", category="error")
-                return render_template("auth/login.html", user=current_user)
+                return response
         else:
             flash("Пользователя с таким почтовым адресом нет", category="error")
             return render_template("auth/login.html", user=current_user)
