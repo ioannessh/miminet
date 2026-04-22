@@ -16,7 +16,7 @@ def _build_test_app():
     app.config.update(
         JWT_SECRET_KEY="test-secret",
         JWT_TOKEN_LOCATION=["cookies"],
-        JWT_COOKIE_DOMAIN=f".localhost",
+        JWT_COOKIE_DOMAIN=".localhost",
         JWT_COOKIE_SECURE=False,  # True,
         JWT_COOKIE_CSRF_PROTECT=False,
         JWT_COOKIE_SAMESITE="Lax",

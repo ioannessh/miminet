@@ -119,7 +119,7 @@ app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
 )
 
-BASE_DOMAIN=os.environ.get('BASE_DOMAIN', None)
+BASE_DOMAIN = os.environ.get("BASE_DOMAIN", None)
 
 # Получаем режим работы из переменных окружения
 MODE = os.getenv("MODE", "dev")
@@ -131,8 +131,12 @@ app.config.update(
     JWT_COOKIE_SECURE=False if MODE == "dev" else True,
     JWT_COOKIE_CSRF_PROTECT=False if MODE == "dev" else True,
     JWT_COOKIE_SAMESITE="Lax",
-    JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=float(os.environ.get("ACCESS_TOKEN_EXPIRES", 1))),
-    JWT_REFRESH_TOKEN_EXPIRES=timedelta(hours=float(os.environ.get("REFRESH_TOKEN_EXPIRES", 2))),
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(
+        hours=float(os.environ.get("ACCESS_TOKEN_EXPIRES", 1))
+    ),
+    JWT_REFRESH_TOKEN_EXPIRES=timedelta(
+        hours=float(os.environ.get("REFRESH_TOKEN_EXPIRES", 2))
+    ),
 )
 
 allowed_hosts_env = os.environ.get("ALLOWED_HOSTS", "")
