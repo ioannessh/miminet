@@ -204,7 +204,7 @@ def test_yandex_callback_handles_user_info_and_creates_user_in_db(app, mocker):
     with app.test_request_context("/yandex_callback?code=test-code", method="GET"):
         session["state"] = "test_state"
         filtered_query = mocker.Mock()
-        filtered_query.first.return_value = None
+        filtered_query.first.side_effect = [None, mocker.Mock(id=10)]
         mock_user = mocker.patch("miminet_auth.User")
         mock_user.query.filter_by.return_value = filtered_query
         mock_oauth2session = mocker.patch("miminet_auth.OAuth2Session")
